@@ -3,7 +3,7 @@
 
 #import <FirebaseCore/FIRApp.h>
 
-#import <React/RCTBridgeModule.h>
+#import "RCTBridgeModule.h"
 
 @import UserNotifications;
 

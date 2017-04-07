@@ -1,8 +1,9 @@
 #import "RNFIRMessaging.h"
 
-#import <React/RCTConvert.h>
-#import <React/RCTEventDispatcher.h>
-#import <React/RCTUtils.h>
+#import "RCTBridge.h"
+#import "RCTConvert.h"
+#import "RCTEventDispatcher.h"
+#import "RCTUtils.h"
 
 @import UserNotifications;
 #import <FirebaseMessaging/FirebaseMessaging.h>
