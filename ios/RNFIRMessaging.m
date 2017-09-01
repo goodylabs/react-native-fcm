@@ -54,13 +54,13 @@ RCT_ENUM_CONVERTER(NSCalendarUnit,
   content.categoryIdentifier = [RCTConvert NSString:details[@"click_action"]];
   content.userInfo = details;
   content.badge = [RCTConvert NSNumber:details[@"badge"]];
-  
+
   NSDate *fireDate = [RCTConvert NSDate:details[@"fire_date"]];
-  
+
   if(fireDate == nil){
     return [UNNotificationRequest requestWithIdentifier:[RCTConvert NSString:details[@"id"]] content:content trigger:nil];
   }
-  
+
   NSCalendarUnit interval = [RCTConvert NSCalendarUnit:details[@"repeat_interval"]];
   NSCalendarUnit unitFlags;
   switch (interval) {
@@ -178,12 +178,12 @@ RCT_EXPORT_MODULE()
 - (void)setBridge:(RCTBridge *)bridge
 {
   _bridge = bridge;
-  
+
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(handleNotificationReceived:)
                                                name:FCMNotificationReceived
                                              object:nil];
-  
+
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(disconnectFCM)
                                                name:UIApplicationDidEnterBackgroundNotification
@@ -192,19 +192,19 @@ RCT_EXPORT_MODULE()
                                            selector:@selector(connectToFCM)
                                                name:UIApplicationDidBecomeActiveNotification
                                              object:nil];
-  
+
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(onTokenRefresh)
    name:kFIRInstanceIDTokenRefreshNotification object:nil];
-  
+
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(sendDataMessageFailure:)
    name:FIRMessagingSendErrorNotification object:nil];
-  
+
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(sendDataMessageSuccess:)
    name:FIRMessagingSendSuccessNotification object:nil];
-  
+
   // For iOS 10 data message (sent via FCM)
   dispatch_async(dispatch_get_main_queue(), ^{
     [[FIRMessaging messaging] setRemoteMessageDelegate:self];
@@ -269,6 +269,7 @@ RCT_EXPORT_METHOD(requestPermissions)
   } else {
     // iOS 10 or later
 #if defined(__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+    [UNUserNotificationCenter currentNotificationCenter].delegate = self;
     UNAuthorizationOptions authOptions =
     UNAuthorizationOptionAlert
     | UNAuthorizationOptionSound
@@ -280,7 +281,7 @@ RCT_EXPORT_METHOD(requestPermissions)
      ];
 #endif
   }
-  
+
   [[UIApplication sharedApplication] registerForRemoteNotifications];
 }
 
@@ -412,15 +413,15 @@ RCT_EXPORT_METHOD(send:(NSString*)senderId withPayload:(NSDictionary *)message)
   for (NSString* key in mMessage) {
     upstreamMessage[key] = [NSString stringWithFormat:@"%@", [mMessage valueForKey:key]];
   }
-  
+
   NSDictionary *imMessage = [NSDictionary dictionaryWithDictionary:upstreamMessage];
-  
+
   int64_t ttl = 3600;
   NSString * receiver = [NSString stringWithFormat:@"%@@gcm.googleapis.com", senderId];
-  
+
   NSUUID *uuid = [NSUUID UUID];
   NSString * messageID = [uuid UUIDString];
-  
+
   [[FIRMessaging messaging]sendMessage:imMessage to:receiver withMessageID:messageID timeToLive:ttl];
 }
 
@@ -467,22 +468,22 @@ RCT_EXPORT_METHOD(finishNotificationResponse: (NSString *)completionHandlerId){
     self.notificationCallbacks[completionHandlerId] = completionHandler;
     data[@"_completionHandlerId"] = completionHandlerId;
   }
-  
+
   [_bridge.eventDispatcher sendDeviceEventWithName:FCMNotificationReceived body:data];
-  
+
 }
 
 - (void)sendDataMessageFailure:(NSNotification *)notification
 {
   NSString *messageID = (NSString *)notification.userInfo[@"messageID"];
-  
+
   NSLog(@"sendDataMessageFailure: %@", messageID);
 }
 
 - (void)sendDataMessageSuccess:(NSNotification *)notification
 {
   NSString *messageID = (NSString *)notification.userInfo[@"messageID"];
-  
+
   NSLog(@"sendDataMessageSuccess: %@", messageID);
 }
 
